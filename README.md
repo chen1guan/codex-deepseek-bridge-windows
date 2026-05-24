@@ -10,20 +10,17 @@
 Codex (VSCode) → Moon Bridge (Transform) → DeepSeek API (Anthropic 协议)
 ```
 
-## 快速开始
+## 安装
 
-```powershell
-# 1. 克隆本仓库
-git clone https://github.com/chen1guan/codex-deepseek-bridge-windows.git
-cd codex-deepseek-bridge-windows
+在 Claude Code 中输入：
 
-# 2. 运行配置脚本（自动安装 Go、克隆 Moon Bridge、生成配置）
-.\setup.ps1
+```
+帮我安装这个 skill：https://github.com/chen1guan/codex-deepseek-bridge-windows
 ```
 
-脚本会提示你输入 DeepSeek API Key（从 [platform.deepseek.com/api_keys](https://platform.deepseek.com/api_keys) 获取），然后自动完成所有配置。
+Claude Code 会自动下载配置脚本并引导你完成安装。安装过程中需要输入你的 DeepSeek API Key（从 [platform.deepseek.com/api_keys](https://platform.deepseek.com/api_keys) 获取）。
 
-配置完成后，在 VSCode 中 `Ctrl+Shift+P` → `Reload Window` 即可使用。
+配置完成后重启 Codex 即可使用。
 
 ## 前置条件
 
