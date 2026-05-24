@@ -97,6 +97,10 @@ Go 日志混入 stdout，用 `cmd /c "2>nul"` 分离 stderr 重新生成
 - [DeepSeek API](https://platform.deepseek.com) — DeepSeek 模型 API
 - [nezhafan/skills](https://github.com/nezhafan/skills) — 原版 Linux/macOS Skill
 
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=chen1guan/codex-deepseek-bridge-windows&type=Date)](https://star-history.com/#chen1guan/codex-deepseek-bridge-windows&Date)
+
 ## 许可证
 
 [MIT](./LICENSE)
