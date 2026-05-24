@@ -1,20 +1,29 @@
 # codex-deepseek-bridge-windows
 
-在 Windows 平台上，通过 Moon Bridge 将 DeepSeek 模型接入 OpenAI Codex（VSCode 插件版），实现本地化部署。
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
+[![Stars](https://img.shields.io/github/stars/chen1guan/codex-deepseek-bridge-windows)](https://github.com/chen1guan/codex-deepseek-bridge-windows)
+[![Last Commit](https://img.shields.io/github/last-commit/chen1guan/codex-deepseek-bridge-windows)](https://github.com/chen1guan/codex-deepseek-bridge-windows)
+
+在 Windows 上将 DeepSeek 模型通过 Moon Bridge 接入 Codex（VSCode 插件版）。
 
 ```
 Codex (VSCode) → Moon Bridge (Transform) → DeepSeek API (Anthropic 协议)
 ```
 
-> 原始 Skill 只支持 Linux/macOS，本项目基于 Windows 实机部署经验整理，覆盖了官方未提到的 5 个关键兼容性问题。
+## 快速开始
 
-## 特性
+```powershell
+# 1. 克隆本仓库
+git clone https://github.com/chen1guan/codex-deepseek-bridge-windows.git
+cd codex-deepseek-bridge-windows
 
-- **无需管理员权限**：Go 通过 zip 解压安装，choco/winget 一概不要
-- **中国大陆友好**：内置 GOPROXY 镜像配置，不再卡在 `dial tcp` 超时
-- **线程级配置防还原**：修复 Codex 恢复旧会话时覆盖 config.toml 的问题
-- **VSCode 环境变量兼容**：处理 `claudeCode.environmentVariables` 与 config.toml 的优先级冲突
-- **开机自启**：通过 Windows 启动文件夹快捷方式实现自动启动，无 systemd
+# 2. 运行配置脚本（自动安装 Go、克隆 Moon Bridge、生成配置）
+.\setup.ps1
+```
+
+脚本会提示你输入 DeepSeek API Key（从 [platform.deepseek.com/api_keys](https://platform.deepseek.com/api_keys) 获取），然后自动完成所有配置。
+
+配置完成后，在 VSCode 中 `Ctrl+Shift+P` → `Reload Window` 即可使用。
 
 ## 前置条件
 
@@ -25,77 +34,38 @@ Codex (VSCode) → Moon Bridge (Transform) → DeepSeek API (Anthropic 协议)
 | Git | 已安装 |
 | DeepSeek API Key | 从 [platform.deepseek.com/api_keys](https://platform.deepseek.com/api_keys) 获取 |
 
-## 快速开始
+不需要管理员权限，不需要安装其他工具。
 
-完整步骤请查看 [SKILL.md](./SKILL.md)，这里是一个概览：
+## 手动配置
 
-```powershell
-# 1. 安装 Go（无需管理员）
-# → 下载 zip 解压到 %USERPROFILE%\go，详见 SKILL.md
+如果不想用脚本，可以按照 [SETUP.md](./SETUP.md) 中的步骤手动配置。
 
-# 2. 设置环境变量
-$env:GOROOT = "$env:USERPROFILE\go"
-$env:GOPATH = "$env:USERPROFILE\go\gopath"
-$env:GOPROXY = "https://goproxy.cn,direct"
-$env:PATH = "$env:GOROOT\bin;$env:PATH"
+## 特性
 
-# 3. 克隆 Moon Bridge
-git clone https://github.com/ZhiYi-R/moon-bridge.git $env:USERPROFILE\.moonbridge
-
-# 4. 配置 API Key + 编写 config.yml（详见 SKILL.md）
-
-# 5. 编译
-cd $env:USERPROFILE\.moonbridge
-go build ./cmd/moonbridge
-
-# 6. 启动
-go run .\cmd\moonbridge --config config.yml
-
-# 7. 生成 Codex 配置文件（详见 SKILL.md）
-
-# 8. VSCode 中 Ctrl+Shift+P → Reload Window
-```
-
-## 与原版 Skill 的差异
-
-原版 Skill（[nezhafan/skills](https://github.com/nezhafan/skills)）仅适配 Linux/macOS，本项目在此基础上做了以下 Windows 适配：
-
-| 问题 | 原版做法 | Windows 适配 |
-|------|----------|-------------|
-| 安装 Go | `brew install go` / `apt install` | zip 解压到用户目录，无需管理员 |
-| Go 模块代理 | 默认 `proxy.golang.org` | 改用 `goproxy.cn`（中国大陆必备） |
-| 日志混入输出 | 不涉及 | `cmd /c "2>nul"` 分离 stderr |
-| config.toml 被还原 | 不涉及 | 修改 `state_5.sqlite` 中旧线程的 provider |
-| VSCode 环境变量 | 不涉及 | 同步修改 `settings.json` 中的 `ANTHROPIC_BASE_URL` |
-| 开机自启 | systemd / nohup | 启动文件夹快捷方式 |
+- **无需管理员权限**：Go 通过 zip 解压安装
+- **中国大陆友好**：内置 GOPROXY 镜像配置
+- **线程级配置防还原**：修复 Codex 恢复旧会话时覆盖 config.toml 的问题
+- **VSCode 环境变量兼容**：处理环境变量与 config.toml 的优先级冲突
+- **开机自启**：通过启动文件夹快捷方式自动启动
 
 ## 常见问题
 
 **Codex 反复 Reconnecting，发消息无反应**
 
-可能原因：
-1. Moon Bridge 没启动 → 运行 `Invoke-WebRequest http://127.0.0.1:38440/v1/models` 检查
-2. `config.toml` 被旧线程还原 → 运行 `sqlite3 $env:USERPROFILE\.codex\state_5.sqlite "UPDATE threads SET model_provider='moonbridge', model='moonbridge' WHERE model_provider!='moonbridge';"`
-3. VSCode 环境变量覆盖了 config → 检查 `settings.json` 中的 `claudeCode.environmentVariables`
+1. 检查 Moon Bridge 是否启动：`Invoke-WebRequest http://127.0.0.1:38440/v1/models`
+2. 检查 `config.toml` 是否被旧线程还原（详见 [SETUP.md](./SETUP.md#configtoml-被覆盖回旧配置)）
+3. 检查 VSCode 设置中的 `claudeCode.environmentVariables` 是否指向 Moon Bridge
 
 **编译报错 `dial tcp ... connectex`**
 
 Go 模块代理被墙，执行 `$env:GOPROXY = "https://goproxy.cn,direct"`
-
-**config.toml 第一行不是 `model = "moonbridge"`**
-
-Go 日志混入 stdout，用 `cmd /c "2>nul"` 分离 stderr 重新生成
 
 **401 / 402 错误**
 
 - 401 → API Key 无效，检查 `config.yml`
 - 402 → DeepSeek 欠费，去 [platform.deepseek.com](https://platform.deepseek.com) 充值
 
-## 相关项目
-
-- [Moon Bridge](https://github.com/ZhiYi-R/moon-bridge) — Anthropic 协议转发层
-- [DeepSeek API](https://platform.deepseek.com) — DeepSeek 模型 API
-- [nezhafan/skills](https://github.com/nezhafan/skills) — 原版 Linux/macOS Skill
+详细排查步骤见 [SETUP.md](./SETUP.md#常见问题)
 
 ## Star History
 
